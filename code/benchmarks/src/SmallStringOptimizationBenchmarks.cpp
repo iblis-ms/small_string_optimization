@@ -1,14 +1,20 @@
 
-#include <benchmark/benchmark.h>
 #include <SmallStringOptimization/SmallStringOptimization.hpp>
+#include <SmallStringOptimization/SimpleString.hpp>
 
 
+#include <benchmark/benchmark.h>
 #include <memory>
 #include <vector>
 #include <fstream>
 #include <string>
 
 using namespace NSSO;
+namespace std
+{
+using namespace NSSO;
+}
+
 const char* gFilePath = "pan-tadeusz.txt";
 
 std::vector<std::string> readFileLineByLine(const char* aFilePath)
@@ -177,20 +183,29 @@ void Benchmark_StringOpt20(benchmark::State& aState)
 }
 
 
+template<typename T>
+void Benchmark_SimpleString(benchmark::State& aState)
+{
+    runner<CSimpleString<>, T>(aState);
+}
 
 
 BENCHMARK_TEMPLATE(Benchmark_String, CWordToMap);
 BENCHMARK_TEMPLATE(Benchmark_StringOpt10, CWordToMap);
 BENCHMARK_TEMPLATE(Benchmark_StringOpt20, CWordToMap);
+BENCHMARK_TEMPLATE(Benchmark_SimpleString, CWordToMap);
 
 
 BENCHMARK_TEMPLATE(Benchmark_String, CIncreasedWordToMap);
 BENCHMARK_TEMPLATE(Benchmark_StringOpt10, CIncreasedWordToMap);
 BENCHMARK_TEMPLATE(Benchmark_StringOpt20, CIncreasedWordToMap);
+BENCHMARK_TEMPLATE(Benchmark_SimpleString, CIncreasedWordToMap);
 
 
 BENCHMARK_TEMPLATE(Benchmark_String, CSumWordToMap);
 BENCHMARK_TEMPLATE(Benchmark_StringOpt10, CSumWordToMap);
 BENCHMARK_TEMPLATE(Benchmark_StringOpt20, CSumWordToMap);
+BENCHMARK_TEMPLATE(Benchmark_SimpleString, CSumWordToMap);
 
 BENCHMARK_MAIN();
+

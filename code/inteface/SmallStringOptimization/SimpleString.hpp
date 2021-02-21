@@ -5,15 +5,13 @@
  * License: MIT
  */
 
-/*
- * Simple implementation of small string optimization structure.
- */
-
-#ifndef SMALL_STRING_OPTIMIZATION_HPP_
-#define SMALL_STRING_OPTIMIZATION_HPP_
+#ifndef SIMPLE_STRING_HPP_
+#define SIMPLE_STRING_HPP_
 
 #include <iostream>
 #include <string>
+#include <cstring>
+#include <map>
 #include <iterator>
 #include <algorithm>
 #include <array>
@@ -24,13 +22,9 @@ namespace NSSO
 {
 
 
-/**
- * @brief Iterator class for SmallStringOpt implementation.
- * 
- * @tparam TChar Character type.
- */
+
 template<typename TChar>
-class CSmallStringOptIterator : public std::iterator<
+class CSimpleStringIterator : public std::iterator<
                                     std::random_access_iterator_tag,   // iterator_category
                                     TChar,                      // value_type
                                     long,                      // difference_type
@@ -51,14 +45,14 @@ public:
      * 
      * @param aPtr Pointer to character in an internal buffer of SmallStringOpt.
      */
-    explicit CSmallStringOptIterator(TChar* aPtr)
+    explicit CSimpleStringIterator(TChar* aPtr)
     : mPtr(aPtr) {}
     
     /**
      * @brief Move iterator to a next character and return it.
      * @return Moved iterator.
      */
-    CSmallStringOptIterator<TChar>& operator++()
+    CSimpleStringIterator<TChar>& operator++()
     {
         ++mPtr;
         return *this;
@@ -68,9 +62,9 @@ public:
      * @brief Move iterator to a next character but return an iterator instance before moving.
      * @return Iterator instance before moving.
      */
-    CSmallStringOptIterator<TChar> operator++(int)
+    CSimpleStringIterator<TChar> operator++(int)
     {
-        CSmallStringOptIterator<TChar> retval{mPtr};
+        CSimpleStringIterator<TChar> retval{mPtr};
         mPtr++;
         return retval;
     }
@@ -79,7 +73,7 @@ public:
      * @brief Move iterator to a previous character and return it.
      * @return Moved iterator.
      */
-    CSmallStringOptIterator<TChar>& operator--()
+    CSimpleStringIterator<TChar>& operator--()
     {
         --mPtr;
         return *this;
@@ -89,9 +83,9 @@ public:
      * @brief Move iterator to a previous character but return an iterator instance before moving.
      * @return Iterator instance before moving.
      */
-    CSmallStringOptIterator<TChar> operator--(int)
+    CSimpleStringIterator<TChar> operator--(int)
     {
-        CSmallStringOptIterator<TChar> retval{mPtr};
+        CSimpleStringIterator<TChar> retval{mPtr};
         mPtr--;
         return retval;
     }
@@ -102,7 +96,7 @@ public:
      * @param aIter Iterator to compare.
      * @return true if there are point to the same memory location.
      */
-    bool operator==(const CSmallStringOptIterator<TChar>& aIter) const
+    bool operator==(const CSimpleStringIterator<TChar>& aIter) const
     {
         return mPtr == aIter.mPtr;
     }
@@ -113,7 +107,7 @@ public:
      * @param aIter Iterator to compare.
      * @return true if there are point not to the same memory location.
      */
-    bool operator!=(const CSmallStringOptIterator<TChar>& aIter) const
+    bool operator!=(const CSimpleStringIterator<TChar>& aIter) const
     {
         return !(*this == aIter);
     }
@@ -144,7 +138,7 @@ public:
      * @param aIter Iterator to compare.
      * @return true iterator points to charecter closer to the beginning of SmallStringOpt instance than the given one.
      */
-    bool operator<(const CSmallStringOptIterator<TChar>& aIter) const
+    bool operator<(const CSimpleStringIterator<TChar>& aIter) const
     {
         return mPtr < aIter.mPtr;
     }
@@ -155,7 +149,7 @@ public:
      * @param aIter Iterator to compare.
      * @return true iterator points to charecter closer to the end of SmallStringOpt instance than the given one.
      */
-    bool operator>(const CSmallStringOptIterator<TChar>& aIter) const
+    bool operator>(const CSimpleStringIterator<TChar>& aIter) const
     {
         return mPtr > aIter.mPtr;
     }
@@ -166,7 +160,7 @@ public:
      * @param aIter Iterator to compare.
      * @return true iterator points to charecter closer/equal to te beginning of SmallStringOpt instance than the given one.
      */
-    bool operator<=(const CSmallStringOptIterator<TChar>& aIter) const
+    bool operator<=(const CSimpleStringIterator<TChar>& aIter) const
     {
         return mPtr <= aIter.mPtr;
     }
@@ -177,7 +171,7 @@ public:
      * @param aIter Iterator to compare.
      * @return true iterator points to charecter closer/equal to te end of SmallStringOpt instance than the given one.
      */
-    bool operator>=(const CSmallStringOptIterator<TChar>& aIter) const
+    bool operator>=(const CSimpleStringIterator<TChar>& aIter) const
     {
         return mPtr >= aIter.mPtr;
     }
@@ -210,9 +204,9 @@ public:
      * @param aDiff Offset.
      * @return Iterator moved by the given offset from this itertor.
      */
-    CSmallStringOptIterator<TChar> operator+(int aDiff) const
+    CSimpleStringIterator<TChar> operator+(int aDiff) const
     {
-        return CSmallStringOptIterator<TChar>(mPtr + aDiff);
+        return CSimpleStringIterator<TChar>(mPtr + aDiff);
     }
     
     /**
@@ -221,9 +215,9 @@ public:
      * @param aDiff Offset.
      * @return Iterator moved by the given offset from this itertor.
      */
-    CSmallStringOptIterator<TChar> operator-(int aDiff) const
+    CSimpleStringIterator<TChar> operator-(int aDiff) const
     {
-        return CSmallStringOptIterator<TChar>(mPtr - aDiff);
+        return CSimpleStringIterator<TChar>(mPtr - aDiff);
     }
 
     /**
@@ -232,24 +226,16 @@ public:
      * @param aIter Iterator to compare.
      * @return long The difference.
      */
-    long operator-(const CSmallStringOptIterator<TChar>& aIter) const
+    long operator-(const CSimpleStringIterator<TChar>& aIter) const
     {
         return mPtr - aIter.mPtr;
     }
 };
 
-template<std::size_t TSmallStringOptLength, typename TChar, typename TAllocator>
-class CSmallStringOpt;
 
-/**
- * @brief Implementation of small string optimization algorithm. Most of functions/typedefs are analoque to std::string.
- * 
- * @tparam TSmallStringOptLength The size of characters array, that holds small strings.
- * @tparam TChar Type of character.
- * @tparam TAllocator Allocator.
- */
-template<std::size_t TSmallStringOptLength, typename TChar = char, typename TAllocator = std::allocator<TChar>>
-class CSmallStringOpt
+
+template<typename TChar = char, typename TAllocator = std::allocator<TChar>>
+class CSimpleString
 {
 public:
     /**
@@ -280,12 +266,12 @@ public:
     /**
      * @brief Iterator type.
      */
-    using iterator = CSmallStringOptIterator<TChar>;
+    using iterator = CSimpleStringIterator<TChar>;
 
     /**
      * @brief Constant iterator type.
      */
-    using const_iterator = CSmallStringOptIterator<const TChar>;
+    using const_iterator = CSimpleStringIterator<const TChar>;
 
     /**
      * @brief Reverse iterator type.
@@ -297,39 +283,19 @@ public:
      */
     using const_reverse_iterator = std::reverse_iterator<const_iterator>;
 
-    /**
-     * @brief Length of characters used for small string optimization.
-     */
-    static constexpr size_type sSmallStringOptLength = TSmallStringOptLength;
+
 
 private:
 
     /**
-     * @brief Type use for casts.
+     * @brief Allocator.
      */
-    using this_const_pointer = const CSmallStringOpt<TSmallStringOptLength, TChar, TAllocator>* ;
-    
-private:
-
-    /**
-     * @brief True if characters are stored in compilation time array. False if characters are in a dynamic array.
-     */
-    bool mSmallStringOptEnable;
+    allocator_type mAllocator;
 
     /**
      * @brief Number of characters in string.
      */
-    size_type mLength; 
-
-    /**
-     * @brief Array used for small string optimizaton.
-     */
-    std::array<value_type, sSmallStringOptLength> mArray;
-
-    /**
-     * @brief Dynamic array to store longer strings.
-     */
-    value_type* mDynamicArray;
+    size_type mLength;
 
     /**
      * @brief Length of a dynamic allocated memory.
@@ -337,21 +303,12 @@ private:
     size_type mAllocatedLength;
 
     /**
-     * @brief Allocator.
+     * @brief Dynamic array to store longer strings.
      */
-    allocator_type mAllocator;
+    value_type* mDynamicArray;
 
 
-    template<std::size_t _TSmallStringOptLength, typename _TChar, typename _TAllocator>
-    friend class CSmallStringOpt;
 
-    /**
-     * @brief Internal memory copy function
-     * 
-     * @param aDest Destination address.
-     * @param aSrc  Source address.
-     * @param aLength Number of characters to copy
-     */
     void internalMemcpy(TChar* aDest, const TChar* aSrc, size_type aLength)
     {
         CFast<TChar>::memcpy(aDest, aSrc,  aLength * sizeof(TChar));
@@ -362,133 +319,41 @@ public:
     /**
      * @brief Construct empy string.
      */
-    CSmallStringOpt() noexcept
-        : mSmallStringOptEnable{ true }
+    CSimpleString() noexcept
+        : mAllocator{} 
         , mLength{0u}
-        , mArray{}
-        , mDynamicArray{nullptr}
         , mAllocatedLength{ 0 }
-        , mAllocator{} 
+        , mDynamicArray{nullptr}
     {
     }
 
     /**
      * @brief Construct a string.
      * 
-     * @tparam TObjNoChar Number of characters used for small string optimization in the given object.
      * @param aObj String to copy.
      */
-    template<size_type TObjNoChar>
-    explicit CSmallStringOpt(const CSmallStringOpt<TObjNoChar, TChar, TAllocator>& aObj)  noexcept(noexcept(mAllocator.allocate(0u)))
-        : mSmallStringOptEnable{ true }
-        , mLength{0u}
-        , mArray{}
-        , mDynamicArray{nullptr}
-        , mAllocatedLength{ 0 }
-        , mAllocator{} 
+    explicit CSimpleString(const CSimpleString<TChar, TAllocator>& aObj)  noexcept(noexcept(mAllocator.allocate(0u)))
+        : CSimpleString(aObj.mDynamicArray, aObj.mLength)
     {
-        const size_type lengthToCopy = mLength + 1u;
-        TChar* ptr = nullptr;
-        if (sSmallStringOptLength < lengthToCopy)
-        {
-            mAllocatedLength = lengthToCopy;
-            mDynamicArray = mAllocator.allocate(lengthToCopy);
-            mSmallStringOptEnable = false;
-        }
-        internalMemcpy(
-            beginPtr(),
-            aObj.beginPtr(), 
-            lengthToCopy);
+    }
 
+    CSimpleString(CSimpleString<TChar, TAllocator>&& aObj) noexcept(noexcept(mAllocator.allocate(0u)))
+        : mAllocator{} 
+        , mLength{aObj.mLength}
+        , mAllocatedLength{aObj.mAllocatedLength}
+        , mDynamicArray{aObj.mDynamicArray}
+    {
+        aObj.mDynamicArray = nullptr;
+        aObj.mAllocatedLength = 0u;
     }
 
     /**
-     * @brief Construct string. Copy constructor required even there is template based constructor. Copy constructor needs to be declared.
-     * 
+     * @brief Construct string. 
+     *
      * @param aObj string to copy.
      */
-    explicit CSmallStringOpt(const CSmallStringOpt<TSmallStringOptLength, TChar, TAllocator>& aObj) noexcept(noexcept(mAllocator.allocate(0u)))
-        : mSmallStringOptEnable{ aObj.mSmallStringOptEnable }
-        , mLength{aObj.mLength}
-        , mArray{}
-        , mDynamicArray{nullptr}
-        , mAllocatedLength{ 0 }
-        , mAllocator{} 
-    {
-        const size_type lengthToCopy = mLength + 1u;
-        if (lengthToCopy > sSmallStringOptLength)
-        {
-            mAllocatedLength = lengthToCopy;
-            mDynamicArray = mAllocator.allocate(lengthToCopy);
-            mSmallStringOptEnable = false;
-        }
-        internalMemcpy(
-            beginPtr(),
-            aObj.beginPtr(), 
-            lengthToCopy);
-    }
-
-    /**
-     * @brief Construct string
-     * 
-     * @tparam TObjNoChar Number of characters used for small string optimization in the given object.
-     * @param aObj String to move.
-     */
-    template<size_type TObjNoChar>
-    CSmallStringOpt(CSmallStringOpt<TObjNoChar>&& aObj) noexcept(noexcept(mAllocator.allocate(0u)))
-        : mSmallStringOptEnable(true)
-        , mLength(aObj.mLength)
-        , mArray{}
-        , mDynamicArray{ nullptr }
-        , mAllocatedLength{ 0u }
-        , mAllocator{}
-    {
-        const auto lengthToCopy = mLength + 1u;
-        if (lengthToCopy > sSmallStringOptLength)
-        {
-            std::swap(mAllocatedLength, aObj.mAllocatedLength);
-            std::swap(mDynamicArray, aObj.mDynamicArray);
-            mSmallStringOptEnable = false;
-        }
-        else
-        {
-            internalMemcpy(mArray.data(), aObj.beginPtr(), lengthToCopy);
-        }
-    }
-
-    /**
-     * @brief Construct string. Move constructor required even there is template based constructor. Move constructor needs to be declared.
-     * 
-     * @param aObj String to move.
-     */
-    CSmallStringOpt(CSmallStringOpt<TSmallStringOptLength>&& aObj) noexcept(noexcept(mAllocator.allocate(0u)))
-        : mSmallStringOptEnable(true)
-        , mLength(aObj.mLength)
-        , mArray{}
-        , mDynamicArray{ nullptr }
-        , mAllocatedLength{ 0u }
-        , mAllocator{}
-    {
-        const auto lengthToCopy = mLength + 1u;
-        if (lengthToCopy > sSmallStringOptLength)
-        {
-            std::swap(mAllocatedLength, aObj.mAllocatedLength);
-            std::swap(mDynamicArray, aObj.mDynamicArray);
-            mSmallStringOptEnable = false;
-        }
-        else
-        {
-            internalMemcpy(mArray.data(), aObj.beginPtr(), lengthToCopy);
-        }
-    }
-
-    /**
-     * @brief Construct string by copying string from given array.
-     * 
-     * @param aTxt String array.
-     */
-    explicit CSmallStringOpt(const TChar* aTxt) noexcept(noexcept(CSmallStringOpt(nullptr, 0u)))
-        : CSmallStringOpt(aTxt, txtLength(aTxt))
+    explicit CSimpleString(const TChar* aTxt) noexcept(noexcept(CSimpleString(nullptr, 0u)))
+        : CSimpleString(aTxt, txtLength(aTxt))
     {}
 
     /**
@@ -497,28 +362,17 @@ public:
      * @param aTxt String array.
      * @param aLength Length of string. Don't need to be null terminated.
      */
-    CSmallStringOpt(const TChar* aTxt, size_type aLength) noexcept(noexcept(mAllocator.allocate(0u)))
-        : mSmallStringOptEnable(true)
-        , mLength(aLength)
-        , mArray{}
-        , mDynamicArray{ nullptr }
-        , mAllocatedLength{ 0 }
-        , mAllocator{}
+    CSimpleString(const TChar* aTxt, size_type aLength) noexcept(noexcept(mAllocator.allocate(0u)))
+        : mAllocator{} 
+        , mLength{aLength}
+        , mAllocatedLength{aLength + 1u}
+        , mDynamicArray{mAllocator.allocate(mAllocatedLength)}
     {
-        const size_type lengthToCopy = aLength + 1u;
-        TChar* ptr = mArray.data();
-        if (lengthToCopy > sSmallStringOptLength)
-        {
-            mSmallStringOptEnable = false;
-            mAllocatedLength = lengthToCopy;
-            mDynamicArray = mAllocator.allocate(mAllocatedLength);
-            ptr = mDynamicArray;
-        }
         internalMemcpy(
-            ptr,
-            aTxt,
-            aLength);
-        ptr[aLength] = '\0';
+            mDynamicArray, 
+            aTxt, 
+            mLength);
+        mDynamicArray[mLength] = '\0';
     }
 
     /**
@@ -526,8 +380,8 @@ public:
      * 
      * @param aStr std::string object.
      */
-    explicit CSmallStringOpt(const std::basic_string<TChar>& aStr) noexcept(noexcept(CSmallStringOpt(nullptr, 0u)))
-        : CSmallStringOpt(aStr.c_str(), aStr.size())
+    explicit CSimpleString(const std::basic_string<TChar>& aStr) noexcept(noexcept(CSimpleString(nullptr, 0u)))
+        : CSimpleString(aStr.c_str(), aStr.size())
     {}
 
     /**
@@ -536,27 +390,12 @@ public:
      * @param aObj Object to copy its character to this string.
      * @return CSmallStringOpt& This object.
      */
-    CSmallStringOpt& operator=(const CSmallStringOpt<TSmallStringOptLength, TChar, TAllocator>& aObj) 
+    CSimpleString& operator=(const CSimpleString<TChar, TAllocator>& aObj) 
         noexcept(noexcept(mAllocator.allocate(0u)) && noexcept(mAllocator.deallocate(nullptr, 0u)))
     {
         assign(aObj);
         return *this;
 	}
-
-    /**
-     * @brief Assignment operator. 
-     * 
-     * @tparam TObjNoChar Number of characters used for small string optimization in the given object.
-     * @param aObj Object to copy its character to this string.
-     * @return CSmallStringOpt& This object.
-     */
-    template<size_type TObjNoChar>
-    CSmallStringOpt& operator=(const CSmallStringOpt<TObjNoChar, TChar, TAllocator>& aObj) 
-        noexcept(noexcept(mAllocator.allocate(0u)) && noexcept(mAllocator.deallocate(nullptr, 0u)))
-    {
-        assign(aObj);
-        return *this;
-    }
 
     /**
      * @brief Move assignment operator. 
@@ -565,44 +404,12 @@ public:
      * @param aObj Object to copy/move its character to this string.
      * @return CSmallStringOpt& This object.
      */
-    template<size_type TObjNoChar>
-    CSmallStringOpt& operator=(CSmallStringOpt<TObjNoChar>&& aObj) 
+    CSimpleString& operator=(CSimpleString<TChar, TAllocator>&& aObj) 
         noexcept(noexcept(mAllocator.allocate(0u)) && noexcept(mAllocator.deallocate(nullptr, 0u)))
     {
-        const auto requiredLength = aObj.mLength + 1u;
-        if (aObj.mSmallStringOptEnable)
-        {
-            if (requiredLength <= sSmallStringOptLength)
-            {
-                internalMemcpy(mArray.data(), aObj.mArray.data(), requiredLength);
-                mSmallStringOptEnable = true;
-            }
-            else
-            {
-                if (requiredLength <= mAllocatedLength)
-                {
-                    internalMemcpy(mDynamicArray, aObj.mArray.data(), requiredLength);
-                }
-                else
-                {
-                    mAllocator.deallocate(mDynamicArray, mAllocatedLength);
-                    mAllocatedLength = requiredLength;
-                    mDynamicArray = mAllocator.allocate(requiredLength);
-                    internalMemcpy(mDynamicArray, aObj.mArray.data(), requiredLength);
-                }
-                mSmallStringOptEnable = false;
-            }
-        }
-        else
-        {
-            std::swap(mDynamicArray, aObj.mDynamicArray);
-            std::swap(mAllocatedLength, aObj.mAllocatedLength);
-            aObj.mSmallStringOptEnable = mSmallStringOptEnable;
-            mSmallStringOptEnable = false;
-        }
-        
-        mLength = aObj.mLength;
-        
+        std::swap(mDynamicArray, aObj.mDynamicArray);
+        std::swap(mAllocatedLength, aObj.mAllocatedLength);
+        std::swap(mLength, aObj.mLength);
         return *this;
     }
     
@@ -612,29 +419,26 @@ public:
      * @param aTxt String array to copy.
      * @return CSmallStringOpt& This object.
      */
-    CSmallStringOpt& operator=(const TChar* aTxt) noexcept(this->assign(nullptr, 0))
+    CSimpleString& operator=(const TChar* aTxt) noexcept(this->assign(nullptr, 0))
     {
-        assign(aTxt);
+        const size_type len = txtLength(aTxt);
+        assign(aTxt, len);
         return *this;
     }
-    
+
     /**
      * @brief Assignment operator.
      * 
      * @param aTxt std::string to copy.
      * @return CSmallStringOpt& This object.
      */
-    CSmallStringOpt& operator=(const std::basic_string<TChar>& aTxt) noexcept(this->assign(nullptr, 0))
+    CSimpleString& operator=(const std::basic_string<TChar>& aTxt) noexcept(this->assign(nullptr, 0))
     {
-        assign(aTxt);
+        assign(aTxt.c_str(), aTxt.size());
         return *this;
     }
 
-    /**
-     * @brief Destroy the instance. Deallocates memory if required.
-     * 
-     */
-    ~CSmallStringOpt() 
+    ~CSimpleString() 
     {
         mAllocator.deallocate(mDynamicArray, mAllocatedLength);
     }
@@ -655,25 +459,19 @@ public:
     void shrink_to_fit()
         noexcept(noexcept(mAllocator.allocate(0u)) && noexcept(mAllocator.deallocate(nullptr, 0u)))
     {
-        if (mDynamicArray != nullptr)
+
+        if (mLength < mAllocatedLength)
         {
-            if (true == mSmallStringOptEnable)
-            {
-                mAllocator.deallocate(mDynamicArray, mAllocatedLength);
-                mDynamicArray = nullptr;
-            }
-            else if (mAllocatedLength > mLength + 1u)
-            {
-                const size_type lengthToCopy = mLength + 1u;
-                pointer ptr = mAllocator.allocate(lengthToCopy);
-                internalMemcpy(
-                    ptr,
-                    mDynamicArray,
-                    lengthToCopy);
-                mAllocator.deallocate(mDynamicArray, mAllocatedLength);
-                mDynamicArray = ptr;
-                mAllocatedLength = lengthToCopy;
-            }
+            const auto lengthToCopy = mLength + 1u;
+            pointer ptr = mAllocator.allocate(lengthToCopy);
+
+            internalMemcpy(
+                ptr, 
+                mDynamicArray, 
+                lengthToCopy);
+            mAllocator.deallocate(mDynamicArray, mAllocatedLength);
+            mDynamicArray = ptr;
+            mAllocatedLength = lengthToCopy;
         }
     }
 
@@ -692,9 +490,9 @@ public:
      */
     const TChar* data() const noexcept
     {
-        if (true == mSmallStringOptEnable)
+        if (empty())
         {
-            return mArray.data();
+            return "";
         }
         return mDynamicArray;
     }
@@ -707,10 +505,6 @@ public:
      */
     const TChar& operator[](size_type aIndex) const noexcept
     {
-        if (true == mSmallStringOptEnable)
-        {
-            return mArray[aIndex];
-        }
         return mDynamicArray[aIndex];
     }
 
@@ -722,21 +516,12 @@ public:
      */
     TChar& operator[](size_type aIndex) noexcept
     {
-        if (true == mSmallStringOptEnable)
-        {
-            return mArray[aIndex];
-        }
         return mDynamicArray[aIndex];
     }
 
-    /**
-     * @brief Reserve dynamic memory to store the given number of characters without memory reallocaton.
-     * 
-     * @param aSize Size of reserved memory in a number of characters.
-     */
-    void reserve(size_type aSize) noexcept(noexcept(mAllocator.allocate(0u)))
+    void resever(size_type aSize) noexcept(noexcept(mAllocator.allocate(0u)))
     {
-        if (aSize > sSmallStringOptLength && aSize > mAllocatedLength)
+        if (aSize > mAllocatedLength)
         {
             value_type* ptr = mAllocator.allocate(aSize);
             internalMemcpy(ptr, mDynamicArray, mLength + 1u);
@@ -753,24 +538,17 @@ public:
      */
     size_type capacity() const noexcept
     {
-        return std::max(sSmallStringOptLength, mAllocatedLength);
+        return mAllocatedLength;
     }
 
-    /**
-     * @brief Assign string to this object.
-     * 
-     * @tparam TObjNoChar 
-     * @param aObj Object to assign.
-     */
-    template<size_type TObjNoChar>
-    void assign(const CSmallStringOpt<TObjNoChar, TChar, TAllocator>& aObj) 
+    void assign(const CSimpleString<TChar, TAllocator>& aObj) 
         noexcept(noexcept(mAllocator.allocate(0u)) && noexcept(mAllocator.deallocate(nullptr, 0u)))
     {
 		if (this == &aObj)
 		{
 			return ;
 		}
-        assign(aObj.beginPtr(), aObj.mLength);
+        assign(aObj.mDynamicArray, aObj.mLength);
     }
 	
     /**
@@ -782,31 +560,22 @@ public:
     void assign(const TChar* aTxt, size_type aLength)
         noexcept(noexcept(mAllocator.allocate(0u)) && noexcept(mAllocator.deallocate(nullptr, 0u)))
     {
+
         const size_type lengthToCopy = aLength + 1u;
-        TChar* ptr = nullptr;
-        if (lengthToCopy < sSmallStringOptLength)
+        
+        if (mAllocatedLength <= lengthToCopy)
         {
-            ptr = mArray.data();
-            mSmallStringOptEnable = true;
-        }
-        else
-        {
-            if (mAllocatedLength < lengthToCopy)
-            {
-                mAllocator.deallocate(mDynamicArray, mAllocatedLength);
-                mAllocatedLength = lengthToCopy;
-                mDynamicArray = mAllocator.allocate(mAllocatedLength);
-            }
-            ptr = mDynamicArray;
-            mSmallStringOptEnable = false;
+            mAllocator.deallocate(mDynamicArray, mAllocatedLength);
+            mAllocatedLength = lengthToCopy;
+            mDynamicArray = mAllocator.allocate(mAllocatedLength);
         }
 
+        mLength = aLength;
         internalMemcpy(
-            ptr,
+            mDynamicArray,
             aTxt,
             aLength);
-        ptr[aLength] = '\0';
-        mLength = aLength;
+        mDynamicArray[aLength] = '\0';
     }
 
     /**
@@ -816,7 +585,7 @@ public:
      */
     void assign(const TChar* aTxt) noexcept(noexcept(assign(nullptr, 0u)))
     {
-        const size_type len = NSSO::txtLength(aTxt);
+        const size_type len = txtLength(aTxt);
         assign(aTxt, len);
     }
 
@@ -831,18 +600,17 @@ public:
     }
 
     
+    // append
+
     /**
      * @brief Append the given string object.
      * 
-     * @tparam TObjNoChar 
      * @param aObj String object to append.
      */
-    template<size_type TObjNoChar>
-    void append(const CSmallStringOpt<TObjNoChar, TChar, TAllocator>& aObj)
+    void append(const CSimpleString<TChar, TAllocator>& aObj)
         noexcept(noexcept(mAllocator.allocate(0u)) && noexcept(mAllocator.deallocate(nullptr, 0u)))
     {
-        append(aObj.beginPtr(), aObj.mLength);
-        
+        append(aObj.mDynamicArray, aObj.mLength);
     }
     
     /**
@@ -853,7 +621,7 @@ public:
     void append(const TChar* aTxt)
         noexcept(noexcept(mAllocator.allocate(0u)) && noexcept(mAllocator.deallocate(nullptr, 0u)))
     {
-        const auto len = NSSO::txtLength(aTxt);
+        const auto len = txtLength(aTxt);
         append(aTxt, len);
     }
     
@@ -866,42 +634,21 @@ public:
     void append(const TChar* aTxt, size_type aLen)
         noexcept(noexcept(mAllocator.allocate(0u)) && noexcept(mAllocator.deallocate(nullptr, 0u)))
     {
+        
         const auto fullLength = mLength + aLen + 1u;
-        TChar* ptr = nullptr;
-        if (fullLength <= sSmallStringOptLength)
+        if (mAllocatedLength <= fullLength)
         {
-            ptr = &mArray[mLength];
+            mAllocatedLength = fullLength;
+            auto ptr = mAllocator.allocate(fullLength);
+            internalMemcpy(ptr, mDynamicArray, mLength);
+            mAllocator.deallocate(mDynamicArray, mAllocatedLength);
+            mDynamicArray = ptr;
         }
-        else
-        {
-            if (mAllocatedLength < fullLength)
-            {
-                auto buf = mAllocator.allocate(fullLength);
-                internalMemcpy(
-                    buf,
-                    beginPtr(),
-                    mLength);
-                mAllocator.deallocate(mDynamicArray, mAllocatedLength);
-                mAllocatedLength = fullLength;
-                mDynamicArray = buf;
-            }
-            ptr = mDynamicArray + mLength;
-            mSmallStringOptEnable = false;
-        }
-
+        internalMemcpy(mDynamicArray + mLength, aTxt, aLen);
         mLength += aLen;
-        internalMemcpy(
-            ptr,
-            aTxt,
-            aLen);
-        ptr[aLen] = '\0';
+        mDynamicArray[mLength] = '\0';
     }
     
-    /**
-     * @brief Append the given string to this object.
-     * 
-     * @param aTxt String.
-     */
     void append(const std::basic_string<TChar>& aTxt)
         noexcept(noexcept(mAllocator.allocate(0u)) && noexcept(mAllocator.deallocate(nullptr, 0u)))
     {
@@ -911,12 +658,10 @@ public:
     /**
      * @brief Append the given string to this object.
      * 
-     * @tparam TObjNoChar 
      * @param aObj Stirng to append.
      * @return This object with a concatenated string.
      */
-    template<size_type TObjNoChar>
-    CSmallStringOpt<sSmallStringOptLength, TChar, TAllocator>& operator+=(const CSmallStringOpt<TObjNoChar, TChar, TAllocator>& aObj)
+    CSimpleString<TChar, TAllocator>& operator+=(const CSimpleString<TChar, TAllocator>& aObj)
     {
         append(aObj);
         return *this;
@@ -928,19 +673,19 @@ public:
      * @param aTxt String to append.
      * @return This object with a concatenated string.
      */
-    CSmallStringOpt<sSmallStringOptLength, TChar, TAllocator>& operator+=(const TChar* aTxt)
+    CSimpleString<TChar, TAllocator>& operator+=(const TChar* aTxt)
     {
         append(aTxt);
         return *this;
     }
-
+    
     /**
      * @brief Append the given string to this object.
      * 
      * @param aTxt String to append.
      * @return This object with a concatenated string.
      */
-    CSmallStringOpt<sSmallStringOptLength, TChar, TAllocator>& operator+=(const std::basic_string<TChar>& aTxt)
+    CSimpleString<TChar, TAllocator>& operator+=(const std::basic_string<TChar>& aTxt)
     {
         append(aTxt);
         return *this;
@@ -949,15 +694,13 @@ public:
     
     /**
      * @brief Add the given string.
-     * 
-     * @tparam TObjNoChar 
+     *  
      * @param aObj String to add.
      * @return This object with a concatenated string.
      */
-    template<size_type TObjNoChar>
-    CSmallStringOpt<sSmallStringOptLength, TChar, TAllocator> operator+(const CSmallStringOpt<TObjNoChar, TChar, TAllocator>& aObj)
+    CSimpleString<TChar, TAllocator> operator+(const CSimpleString<TChar, TAllocator>& aObj)
     {
-        CSmallStringOpt<sSmallStringOptLength, TChar, TAllocator> output;
+        CSimpleString<TChar, TAllocator> output;
         output.resever(mLength + aObj.mLength + 1u);
         output.append(*this);
         output.append(aObj);
@@ -970,10 +713,10 @@ public:
      * @param aTxt String to add.
      * @return This object with a concatenated string.
      */
-    CSmallStringOpt<sSmallStringOptLength, TChar, TAllocator>& operator+(const TChar* aTxt)
+    CSimpleString<TChar, TAllocator>& operator+(const TChar* aTxt)
     {
-        CSmallStringOpt<sSmallStringOptLength, TChar, TAllocator> output;
-        const auto len = NSSO::txtLength(aTxt);
+        CSimpleString<TChar, TAllocator> output;
+        const auto len = txtLength(aTxt);
         output.resever(mLength + len + 1u);
         output.append(*this);
         output.append(aTxt, len);
@@ -986,9 +729,9 @@ public:
      * @param aTxt String to add.
      * @return This object with a concatenated string.
      */
-    CSmallStringOpt<sSmallStringOptLength, TChar, TAllocator> operator+(const std::basic_string<TChar>& aTxt)
+    CSimpleString<TChar, TAllocator> operator+(const std::basic_string<TChar>& aTxt)
     {
-        CSmallStringOpt<sSmallStringOptLength, TChar, TAllocator> output;
+        CSimpleString<TChar, TAllocator> output;
         output.resever(mLength + aTxt.size() + 1u);
         output.append(*this);
         output.append(aTxt);
@@ -1002,24 +745,14 @@ public:
      */
     TChar& front() noexcept
     {
-        // effective C++
-        return const_cast<TChar&>((static_cast<this_const_pointer>(this))->front());
-    }
-    
-    /**
-     * @brief Return the first character in string.
-     * 
-     * @return The first character in string.
-     */
-    const TChar& front() const noexcept
-    {
-        if (true == mSmallStringOptEnable)
-        {
-            return mArray[0];
-        }
         return mDynamicArray[0];
     }
-    
+
+    const TChar& front() const noexcept
+    {
+        return mDynamicArray[0];
+    }
+
     /**
      * @brief Return the last character in string.
      * 
@@ -1027,8 +760,7 @@ public:
      */
     TChar& back() noexcept
     {
-        // effective C++
-        return const_cast<TChar&>((static_cast<this_const_pointer>(this))->back());
+        return mDynamicArray[mLength - 1u];
     }
 
     /**
@@ -1038,11 +770,7 @@ public:
      */
     const TChar& back() const noexcept
     {
-        if (true == mSmallStringOptEnable)
-        {
-            return mArray[mLength - 1];
-        }
-        return mDynamicArray[mLength - 1];
+        return mDynamicArray[mLength - 1u];
     }
     
     /**
@@ -1052,7 +780,7 @@ public:
      */
     const_iterator begin() const noexcept
     {
-        return const_iterator{beginPtr()};
+        return const_iterator{mDynamicArray};
     }
 
     /**
@@ -1062,7 +790,7 @@ public:
      */
     iterator begin() noexcept
     {
-        return iterator{beginPtr()};
+        return iterator{mDynamicArray};
     }
 
     /**
@@ -1082,7 +810,7 @@ public:
      */
     const_iterator end() const noexcept
     {
-        return const_iterator{endPtr()};
+        return const_iterator{&mDynamicArray[mLength]};
     }
 
     /**
@@ -1092,7 +820,7 @@ public:
      */
     iterator end() noexcept
     {
-        return iterator{endPtr()};
+        return iterator{&mDynamicArray[mLength]};
     }
 
     /**
@@ -1112,7 +840,7 @@ public:
      */
     const_reverse_iterator rbegin() const noexcept
     {
-       return std::make_reverse_iterator(endPtr());
+       return std::make_reverse_iterator(&mDynamicArray[mLength]);
     }
 
     /**
@@ -1122,7 +850,7 @@ public:
      */
     reverse_iterator rbegin() noexcept
     {
-       return std::make_reverse_iterator(endPtr());
+       return std::make_reverse_iterator(&mDynamicArray[mLength]);
     }
 
     /**
@@ -1142,7 +870,7 @@ public:
      */
     const_reverse_iterator rend() const noexcept
     {
-       return std::make_reverse_iterator(beginPtr());
+       return std::make_reverse_iterator(&mDynamicArray[0]);
     }
 
     /**
@@ -1152,7 +880,7 @@ public:
      */
     reverse_iterator rend() noexcept
     {
-       return std::make_reverse_iterator(beginPtr());
+       return std::make_reverse_iterator(&mDynamicArray[0]);
     }
 
     /**
@@ -1165,64 +893,12 @@ public:
         return rend();
     }
    
-private:
-    
-    /**
-     * @brief Return pointer to the first character in string.
-     * 
-     * @return Pointer to the first character in string.
-     */
-    TChar* beginPtr() noexcept
-    {
-        return const_cast<TChar*>((static_cast<this_const_pointer>(this))->beginPtr());
-    }
-
-    /**
-     * @brief Return pointer to the first character in string.
-     * 
-     * @return Pointer to the first character in string.
-     */
-    const TChar* beginPtr() const noexcept
-    {
-        if (true == mSmallStringOptEnable)
-        {
-            return mArray.data();
-        }
-        return mDynamicArray;
-    }
-    
-    /**
-     * @brief Return pointer to the character after the last.
-     * 
-     * @return Pointer to the character after the last.
-     */
-    TChar* endPtr() noexcept
-    {
-        return const_cast<TChar*>((static_cast<this_const_pointer>(this))->endPtr());
-    }
-    
-    /**
-     * @brief Return pointer to the character after the last.
-     * 
-     * @return Pointer to the character after the last.
-     */
-    const TChar* endPtr() const noexcept
-    {
-        if (true == mSmallStringOptEnable)
-        {
-            return &mArray[mLength];
-        }
-        return &mDynamicArray[mLength];
-    }
 };
-// /////////////////////////////////////////
 
 
 /**
  * @brief Compare strings.
  * 
- * @tparam sSmallStringOptLength1 Length of small string optimization array of the 1st string.
- * @tparam sSmallStringOptLength2 Length of small string optimization array of the 2nd string.
  * @tparam TChar Character type.
  * @tparam TAllocator1 Type of allocator of the first string.
  * @tparam TAllocator2 Type of allocator of the second string.
@@ -1231,14 +907,12 @@ private:
  * @return true if the given strings contain the same characters.
  */
 template<
-    std::size_t sSmallStringOptLength1,
-    std::size_t sSmallStringOptLength2,
     typename TChar,
     typename TAllocator1,
     typename TAllocator2>
 bool operator==(
-    const CSmallStringOpt<sSmallStringOptLength1, TChar, TAllocator1>& aObj1,
-    const CSmallStringOpt<sSmallStringOptLength2, TChar, TAllocator2>& aObj2) noexcept
+    const CSimpleString<TChar, TAllocator1>& aObj1,
+    const CSimpleString<TChar, TAllocator2>& aObj2) noexcept
 {
     if (reinterpret_cast<const void*>(&aObj1) == reinterpret_cast<const void*>(&aObj2))
     {
@@ -1254,7 +928,6 @@ bool operator==(
 /**
  * @brief Compares strings.
  * 
- * @tparam sSmallStringOptLength Length of small string optimization array of the 1st string.
  * @tparam TChar Type of characters
  * @tparam TAllocator Type of allocator.
  * @param aObj1 First string to compare.
@@ -1262,12 +935,11 @@ bool operator==(
  * @return true if there are equal.
  */
 template<
-    std::size_t sSmallStringOptLength,
     typename TChar,
     typename TAllocator>
-    bool operator==(
-        const CSmallStringOpt<sSmallStringOptLength, TChar, TAllocator>& aObj1,
-        const std::basic_string<TChar>& aObj2) noexcept
+bool operator==(
+    const CSimpleString<TChar, TAllocator>& aObj1,
+    const std::basic_string<TChar>& aObj2) noexcept
 {
     if (aObj1.size() != aObj2.size())
     {
@@ -1279,7 +951,6 @@ template<
 /**
  * @brief Compares string.
  * 
- * @tparam sSmallStringOptLength Length of small string optimization array of the 1st string.
  * @tparam TChar  Type of characters
  * @tparam TAllocator Type of allocator.
  * @param aObj1 First string to compare.
@@ -1287,12 +958,11 @@ template<
  * @return true if there are equal.
  */
 template<
-    std::size_t sSmallStringOptLength,
     typename TChar,
     typename TAllocator>
-    bool operator==(
-        const CSmallStringOpt<sSmallStringOptLength, TChar, TAllocator>& aObj1,
-        const TChar* aArray) noexcept
+bool operator==(
+    const CSimpleString<TChar, TAllocator>& aObj1,
+    const TChar* aArray) noexcept
 {
     const auto len = txtLength(aArray);
     if (aObj1.size() != len)
@@ -1305,7 +975,6 @@ template<
 /**
  * @brief Compares string.
  * 
- * @tparam sSmallStringOptLength Length of small string optimization array of the 1st string.
  * @tparam TChar  Type of characters
  * @tparam TAllocator Type of allocator.
  * @param aObj1 First string to compare.
@@ -1313,12 +982,11 @@ template<
  * @return true if there are equal.
  */
 template<
-    std::size_t sSmallStringOptLength,
     typename TChar,
     typename TAllocator>
 bool operator==(
     const std::basic_string<TChar>& aObj1,
-    const CSmallStringOpt<sSmallStringOptLength, TChar, TAllocator>& aObj2) noexcept
+    const CSimpleString<TChar, TAllocator>& aObj2) noexcept
 {
     if (aObj1.size() != aObj2.size())
     {
@@ -1330,7 +998,6 @@ bool operator==(
 /**
  * @brief Compares string.
  * 
- * @tparam sSmallStringOptLength Length of small string optimization array of the 1st string.
  * @tparam TChar  Type of characters
  * @tparam TAllocator Type of allocator.
  * @param aArray First string to compare.
@@ -1338,12 +1005,11 @@ bool operator==(
  * @return true if there are equal.
  */
 template<
-    std::size_t sSmallStringOptLength,
     typename TChar,
     typename TAllocator>
 bool operator==(
     const TChar* aArray,
-    const CSmallStringOpt<sSmallStringOptLength, TChar, TAllocator>& aObj) noexcept
+    const CSimpleString<TChar, TAllocator>& aObj) noexcept
 {
     return aObj == aArray;
 }
@@ -1355,8 +1021,6 @@ bool operator==(
 /**
  * @brief Compare strings.
  * 
- * @tparam sSmallStringOptLength1 Length of small string optimization array of the 1st string.
- * @tparam sSmallStringOptLength2 Length of small string optimization array of the 2nd string.
  * @tparam TChar Character type.
  * @tparam TAllocator1 Type of allocator of the first string.
  * @tparam TAllocator2 Type of allocator of the second string.
@@ -1365,14 +1029,12 @@ bool operator==(
  * @return true if the given strings don't contain the same characters.
  */
 template<
-    std::size_t sSmallStringOptLength1,
-    std::size_t sSmallStringOptLength2,
     typename TChar,
     typename TAllocator1,
     typename TAllocator2>
 bool operator!=(
-    const CSmallStringOpt<sSmallStringOptLength1, TChar, TAllocator1>& aObj1,
-    const CSmallStringOpt<sSmallStringOptLength2, TChar, TAllocator2>& aObj2) noexcept
+    const CSimpleString<TChar, TAllocator1>& aObj1,
+    const CSimpleString<TChar, TAllocator2>& aObj2) noexcept
 {
     return !(aObj1 == aObj2);
 }
@@ -1380,7 +1042,6 @@ bool operator!=(
 /**
  * @brief Compares strings.
  * 
- * @tparam sSmallStringOptLength Length of small string optimization array of the 1st string.
  * @tparam TChar Type of characters
  * @tparam TAllocator Type of allocator.
  * @param aObj1 First string to compare.
@@ -1388,11 +1049,10 @@ bool operator!=(
  * @return true if there are equal.
  */
 template<
-    std::size_t sSmallStringOptLength,
     typename TChar,
     typename TAllocator>
 bool operator!=(
-    const CSmallStringOpt<sSmallStringOptLength, TChar, TAllocator>& aObj1,
+    const CSimpleString<TChar, TAllocator>& aObj1,
     const std::basic_string<TChar>& aObj2) noexcept
 {
     return !(aObj1 == aObj2);
@@ -1401,7 +1061,6 @@ bool operator!=(
 /**
  * @brief Compares string.
  * 
- * @tparam sSmallStringOptLength Length of small string optimization array of the 1st string.
  * @tparam TChar  Type of characters
  * @tparam TAllocator Type of allocator.
  * @param aObj1 First string to compare.
@@ -1409,11 +1068,10 @@ bool operator!=(
  * @return true if there are equal.
  */
 template<
-    std::size_t sSmallStringOptLength,
     typename TChar,
     typename TAllocator>
 bool operator!=(
-    const CSmallStringOpt<sSmallStringOptLength, TChar, TAllocator>& aObj1,
+    const CSimpleString<TChar, TAllocator>& aObj1,
     const TChar* aArray) noexcept
 {
     return !(aObj1 == aArray);
@@ -1426,7 +1084,6 @@ bool operator!=(
 /**
  * @brief Compares string.
  * 
- * @tparam sSmallStringOptLength Length of small string optimization array of the 1st string.
  * @tparam TChar  Type of characters
  * @tparam TAllocator Type of allocator.
  * @param aObj1 First string to compare.
@@ -1434,12 +1091,11 @@ bool operator!=(
  * @return true if there are not equal.
  */
 template<
-    std::size_t sSmallStringOptLength,
     typename TChar,
     typename TAllocator>
 bool operator!=(
     const std::basic_string<TChar>& aObj1,
-    const CSmallStringOpt<sSmallStringOptLength, TChar, TAllocator>& aObj2) noexcept
+    const CSimpleString<TChar, TAllocator>& aObj2) noexcept
 {
     return !(aObj1 == aObj2);
 }
@@ -1447,7 +1103,6 @@ bool operator!=(
 /**
  * @brief Compares string.
  * 
- * @tparam sSmallStringOptLength Length of small string optimization array of the 1st string.
  * @tparam TChar  Type of characters
  * @tparam TAllocator Type of allocator.
  * @param aArray First string to compare.
@@ -1455,12 +1110,11 @@ bool operator!=(
  * @return true if there are not equal.
  */
 template<
-    std::size_t sSmallStringOptLength,
     typename TChar,
     typename TAllocator>
 bool operator!=(
     const TChar* aArray,
-    const CSmallStringOpt<sSmallStringOptLength, TChar, TAllocator>& aObj) noexcept
+    const CSimpleString<TChar, TAllocator>& aObj) noexcept
 {
     return !(aArray == aObj);
 }
@@ -1473,8 +1127,6 @@ bool operator!=(
 /**
  * @brief Compare strings using std::lexicographical_compare.
  * 
- * @tparam sSmallStringOptLength1 Length of small string optimization array of the 1st string.
- * @tparam sSmallStringOptLength2 Length of small string optimization array of the 2nd string.
  * @tparam TChar Character type.
  * @tparam TAllocator1 Type of allocator of the first string.
  * @tparam TAllocator2 Type of allocator of the second string.
@@ -1483,14 +1135,12 @@ bool operator!=(
  * @return true if the first string is a lexicographicaly before the second string.
  */
 template<
-    std::size_t sSmallStringOptLength1,
-    std::size_t sSmallStringOptLength2,
     typename TChar,
     typename TAllocator1,
     typename TAllocator2>
 bool operator<(
-    const CSmallStringOpt<sSmallStringOptLength1, TChar, TAllocator1>& aObj1,
-    const CSmallStringOpt<sSmallStringOptLength2, TChar, TAllocator2>& aObj2) noexcept
+    const CSimpleString<TChar, TAllocator1>& aObj1,
+    const CSimpleString<TChar, TAllocator2>& aObj2) noexcept
 {
     if (reinterpret_cast<const void*>(&aObj1) == reinterpret_cast<const void*>(&aObj2))
     {
@@ -1504,7 +1154,6 @@ bool operator<(
 /**
  * @brief Compare strings using std::lexicographical_compare.
  * 
- * @tparam sSmallStringOptLength Length of small string optimization array of the 1st string.
  * @tparam TChar Type of characters
  * @tparam TAllocator Type of allocator.
  * @param aObj1 First string to compare.
@@ -1512,11 +1161,10 @@ bool operator<(
  * @return true if the first string is a lexicographicaly before the second string.
  */
 template<
-    std::size_t sSmallStringOptLength,
     typename TChar,
     typename TAllocator>
 bool operator<(
-    const CSmallStringOpt<sSmallStringOptLength, TChar, TAllocator>& aObj1,
+    const CSimpleString<TChar, TAllocator>& aObj1,
     const std::basic_string<TChar>& aObj2) noexcept
 {
     return std::lexicographical_compare(aObj1.begin(), aObj1.end(),
@@ -1526,7 +1174,6 @@ bool operator<(
 /**
  * @brief Compare strings using std::lexicographical_compare.
  * 
- * @tparam sSmallStringOptLength Length of small string optimization array of the 1st string.
  * @tparam TChar  Type of characters
  * @tparam TAllocator Type of allocator.
  * @param aObj1 First string to compare.
@@ -1534,11 +1181,10 @@ bool operator<(
  * @return true if the first string is a lexicographicaly before the second string.
  */
 template<
-    std::size_t sSmallStringOptLength,
     typename TChar,
     typename TAllocator>
     bool operator<(
-        const CSmallStringOpt<sSmallStringOptLength, TChar, TAllocator>& aObj1,
+        const CSimpleString<TChar, TAllocator>& aObj1,
         const TChar* aArray) noexcept
 {
     const auto len = txtLength(aArray);
@@ -1551,7 +1197,6 @@ template<
 /**
  * @brief Compare strings using std::lexicographical_compare.
  * 
- * @tparam sSmallStringOptLength Length of small string optimization array of the 1st string.
  * @tparam TChar  Type of characters
  * @tparam TAllocator Type of allocator.
  * @param aObj1 First string to compare.
@@ -1559,12 +1204,11 @@ template<
  * @return true if the first string is a lexicographicaly before the second string.
  */
 template<
-    std::size_t sSmallStringOptLength,
     typename TChar,
     typename TAllocator>
 bool operator<(
     const std::basic_string<TChar>& aObj1,
-    const CSmallStringOpt<sSmallStringOptLength, TChar, TAllocator>& aObj2) noexcept
+    const CSimpleString<TChar, TAllocator>& aObj2) noexcept
 {
     return std::lexicographical_compare(aObj1.begin(), aObj1.end(),
         aObj2.begin(), aObj2.end());
@@ -1573,7 +1217,6 @@ bool operator<(
 /**
  * @brief Compare strings using std::lexicographical_compare.
  * 
- * @tparam sSmallStringOptLength Length of small string optimization array of the 1st string.
  * @tparam TChar  Type of characters
  * @tparam TAllocator Type of allocator.
  * @param aArray First string to compare.
@@ -1581,12 +1224,11 @@ bool operator<(
  * @return true if the first string is a lexicographicaly before the second string.
  */
 template<
-    std::size_t sSmallStringOptLength,
     typename TChar,
     typename TAllocator>
 bool operator<(
     const TChar* aArray,
-    const CSmallStringOpt<sSmallStringOptLength, TChar, TAllocator>& aObj) noexcept
+    const CSimpleString<TChar, TAllocator>& aObj) noexcept
 {
     const auto len = txtLength(aArray);
 
@@ -1602,8 +1244,6 @@ bool operator<(
 /**
  * @brief Compare strings using std::lexicographical_compare.
  * 
- * @tparam sSmallStringOptLength1 Length of small string optimization array of the 1st string.
- * @tparam sSmallStringOptLength2 Length of small string optimization array of the 2nd string.
  * @tparam TChar Character type.
  * @tparam TAllocator1 Type of allocator of the first string.
  * @tparam TAllocator2 Type of allocator of the second string.
@@ -1612,14 +1252,12 @@ bool operator<(
  * @return true if the first string is a lexicographicaly after the second string.
  */
 template<
-    std::size_t sSmallStringOptLength1,
-    std::size_t sSmallStringOptLength2,
     typename TChar,
     typename TAllocator1,
     typename TAllocator2>
 bool operator>(
-    const CSmallStringOpt<sSmallStringOptLength1, TChar, TAllocator1>& aObj1,
-    const CSmallStringOpt<sSmallStringOptLength2, TChar, TAllocator2>& aObj2) noexcept
+    const CSimpleString<TChar, TAllocator1>& aObj1,
+    const CSimpleString<TChar, TAllocator2>& aObj2) noexcept
 {
     return aObj2 < aObj1;
 }
@@ -1627,7 +1265,6 @@ bool operator>(
 /**
  * @brief Compare strings using std::lexicographical_compare.
  * 
- * @tparam sSmallStringOptLength Length of small string optimization array of the 1st string.
  * @tparam TChar Type of characters
  * @tparam TAllocator Type of allocator.
  * @param aObj1 First string to compare.
@@ -1635,11 +1272,10 @@ bool operator>(
  * @return true if the first string is a lexicographicaly after the second string.
  */
 template<
-    std::size_t sSmallStringOptLength,
     typename TChar,
     typename TAllocator>
 bool operator>(
-    const CSmallStringOpt<sSmallStringOptLength, TChar, TAllocator>& aObj1,
+    const CSimpleString<TChar, TAllocator>& aObj1,
     const std::basic_string<TChar>& aObj2) noexcept
 {
     return aObj2 < aObj1;
@@ -1648,7 +1284,6 @@ bool operator>(
 /**
  * @brief Compare strings using std::lexicographical_compare.
  * 
- * @tparam sSmallStringOptLength Length of small string optimization array of the 1st string.
  * @tparam TChar  Type of characters
  * @tparam TAllocator Type of allocator.
  * @param aObj1 First string to compare.
@@ -1656,12 +1291,11 @@ bool operator>(
  * @return true if the first string is a lexicographicaly after the second string.
  */
 template<
-    std::size_t sSmallStringOptLength,
     typename TChar,
     typename TAllocator>
-    bool operator>(
-        const CSmallStringOpt<sSmallStringOptLength, TChar, TAllocator>& aObj1,
-        const TChar* aArray) noexcept
+bool operator>(
+    const CSimpleString<TChar, TAllocator>& aObj1,
+    const TChar* aArray) noexcept
 {
     return aArray < aObj1;
 }
@@ -1673,7 +1307,6 @@ template<
 /**
  * @brief Compare strings using std::lexicographical_compare.
  * 
- * @tparam sSmallStringOptLength Length of small string optimization array of the 1st string.
  * @tparam TChar  Type of characters
  * @tparam TAllocator Type of allocator.
  * @param aObj1 First string to compare.
@@ -1681,12 +1314,11 @@ template<
  * @return true if the first string is a lexicographicaly after the second string.
  */
 template<
-    std::size_t sSmallStringOptLength,
     typename TChar,
     typename TAllocator>
 bool operator>(
     const std::basic_string<TChar>& aObj1,
-    const CSmallStringOpt<sSmallStringOptLength, TChar, TAllocator>& aObj2) noexcept
+    const CSimpleString<TChar, TAllocator>& aObj2) noexcept
 {
     return aObj2 < aObj1;
 }
@@ -1694,7 +1326,6 @@ bool operator>(
 /**
  * @brief Compare strings using std::lexicographical_compare.
  * 
- * @tparam sSmallStringOptLength Length of small string optimization array of the 1st string.
  * @tparam TChar  Type of characters
  * @tparam TAllocator Type of allocator.
  * @param aArray First string to compare.
@@ -1702,12 +1333,11 @@ bool operator>(
  * @return true if the first string is a lexicographicaly after the second string.
  */
 template<
-    std::size_t sSmallStringOptLength,
     typename TChar,
     typename TAllocator>
 bool operator>(
     const TChar* aArray,
-    const CSmallStringOpt<sSmallStringOptLength, TChar, TAllocator>& aObj2) noexcept
+    const CSimpleString<TChar, TAllocator>& aObj2) noexcept
 {
     return aObj2 < aArray;
 }
@@ -1719,8 +1349,6 @@ bool operator>(
 /**
  * @brief Compare strings using std::lexicographical_compare.
  * 
- * @tparam sSmallStringOptLength1 Length of small string optimization array of the 1st string.
- * @tparam sSmallStringOptLength2 Length of small string optimization array of the 2nd string.
  * @tparam TChar Character type.
  * @tparam TAllocator1 Type of allocator of the first string.
  * @tparam TAllocator2 Type of allocator of the second string.
@@ -1729,14 +1357,12 @@ bool operator>(
  * @return true if the first string is a lexicographicaly after or equal the second string.
  */
 template<
-    std::size_t sSmallStringOptLength1,
-    std::size_t sSmallStringOptLength2,
     typename TChar,
     typename TAllocator1,
     typename TAllocator2>
 bool operator>=(
-    const CSmallStringOpt<sSmallStringOptLength1, TChar, TAllocator1>& aObj1,
-    const CSmallStringOpt<sSmallStringOptLength2, TChar, TAllocator2>& aObj2) noexcept
+    const CSimpleString<TChar, TAllocator1>& aObj1,
+    const CSimpleString<TChar, TAllocator2>& aObj2) noexcept
 {
     return !(aObj1 < aObj2);
 }
@@ -1744,7 +1370,6 @@ bool operator>=(
 /**
  * @brief Compare strings using std::lexicographical_compare.
  * 
- * @tparam sSmallStringOptLength Length of small string optimization array of the 1st string.
  * @tparam TChar Type of characters
  * @tparam TAllocator Type of allocator.
  * @param aObj1 First string to compare.
@@ -1752,11 +1377,10 @@ bool operator>=(
  * @return true if the first string is a lexicographicaly after or equal the second string.
  */
 template<
-    std::size_t sSmallStringOptLength,
     typename TChar,
     typename TAllocator>
 bool operator>=(
-    const CSmallStringOpt<sSmallStringOptLength, TChar, TAllocator>& aObj1,
+    const CSimpleString<TChar, TAllocator>& aObj1,
     const std::basic_string<TChar>& aObj2) noexcept
 {
     return !(aObj1 < aObj2);
@@ -1765,7 +1389,6 @@ bool operator>=(
 /**
  * @brief Compare strings using std::lexicographical_compare.
  * 
- * @tparam sSmallStringOptLength Length of small string optimization array of the 1st string.
  * @tparam TChar  Type of characters
  * @tparam TAllocator Type of allocator.
  * @param aObj1 First string to compare.
@@ -1773,11 +1396,10 @@ bool operator>=(
  * @return true if the first string is a lexicographicaly after or equal the second string.
  */
 template<
-    std::size_t sSmallStringOptLength,
     typename TChar,
     typename TAllocator>
     bool operator>=(
-        const CSmallStringOpt<sSmallStringOptLength, TChar, TAllocator>& aObj1,
+        const CSimpleString<TChar, TAllocator>& aObj1,
         const TChar* aArray) noexcept
 {
     return !(aObj1 < aArray);
@@ -1790,7 +1412,6 @@ template<
 /**
  * @brief Compare strings using std::lexicographical_compare.
  * 
- * @tparam sSmallStringOptLength Length of small string optimization array of the 1st string.
  * @tparam TChar  Type of characters
  * @tparam TAllocator Type of allocator.
  * @param aObj1 First string to compare.
@@ -1798,12 +1419,11 @@ template<
  * @return true if the first string is a lexicographicaly after or equal the second string.
  */
 template<
-    std::size_t sSmallStringOptLength,
     typename TChar,
     typename TAllocator>
 bool operator>=(
     const std::basic_string<TChar>& aObj1,
-    const CSmallStringOpt<sSmallStringOptLength, TChar, TAllocator>& aObj2) noexcept
+    const CSimpleString<TChar, TAllocator>& aObj2) noexcept
 {
     return !(aObj1 < aObj2);
 }
@@ -1811,7 +1431,6 @@ bool operator>=(
 /**
  * @brief Compare strings using std::lexicographical_compare.
  * 
- * @tparam sSmallStringOptLength Length of small string optimization array of the 1st string.
  * @tparam TChar  Type of characters
  * @tparam TAllocator Type of allocator.
  * @param aArray First string to compare.
@@ -1819,12 +1438,11 @@ bool operator>=(
  * @return true if the first string is a lexicographicaly after or equal the second string.
  */
 template<
-    std::size_t sSmallStringOptLength,
     typename TChar,
     typename TAllocator>
 bool operator>=(
     const TChar* aArray,
-    const CSmallStringOpt<sSmallStringOptLength, TChar, TAllocator>& aObj) noexcept
+    const CSimpleString<TChar, TAllocator>& aObj) noexcept
 {
     return !(aArray < aObj);
 }
@@ -1835,8 +1453,6 @@ bool operator>=(
 /**
  * @brief Compare strings using std::lexicographical_compare.
  * 
- * @tparam sSmallStringOptLength1 Length of small string optimization array of the 1st string.
- * @tparam sSmallStringOptLength2 Length of small string optimization array of the 2nd string.
  * @tparam TChar Character type.
  * @tparam TAllocator1 Type of allocator of the first string.
  * @tparam TAllocator2 Type of allocator of the second string.
@@ -1845,14 +1461,12 @@ bool operator>=(
  * @return true if the first string is a lexicographicaly before or equal the second string.
  */
 template<
-    std::size_t sSmallStringOptLength1,
-    std::size_t sSmallStringOptLength2,
     typename TChar,
     typename TAllocator1,
     typename TAllocator2>
 bool operator<=(
-    const CSmallStringOpt<sSmallStringOptLength1, TChar, TAllocator1>& aObj1,
-    const CSmallStringOpt<sSmallStringOptLength2, TChar, TAllocator2>& aObj2) noexcept
+    const CSimpleString<TChar, TAllocator1>& aObj1,
+    const CSimpleString<TChar, TAllocator2>& aObj2) noexcept
 {
     return !(aObj1 > aObj2);
 }
@@ -1860,7 +1474,6 @@ bool operator<=(
 /**
  * @brief Compare strings using std::lexicographical_compare.
  * 
- * @tparam sSmallStringOptLength Length of small string optimization array of the 1st string.
  * @tparam TChar Type of characters
  * @tparam TAllocator Type of allocator.
  * @param aObj1 First string to compare.
@@ -1868,11 +1481,10 @@ bool operator<=(
  * @return true if the first string is a lexicographicaly before or equal the second string.
  */
 template<
-    std::size_t sSmallStringOptLength,
     typename TChar,
     typename TAllocator>
 bool operator<=(
-    const CSmallStringOpt<sSmallStringOptLength, TChar, TAllocator>& aObj1,
+    const CSimpleString<TChar, TAllocator>& aObj1,
     const std::basic_string<TChar>& aObj2) noexcept
 {
     return !(aObj1 > aObj2);
@@ -1881,7 +1493,6 @@ bool operator<=(
 /**
  * @brief Compare strings using std::lexicographical_compare.
  * 
- * @tparam sSmallStringOptLength Length of small string optimization array of the 1st string.
  * @tparam TChar  Type of characters
  * @tparam TAllocator Type of allocator.
  * @param aObj1 First string to compare.
@@ -1889,12 +1500,11 @@ bool operator<=(
  * @return true if the first string is a lexicographicaly before or equal the second string.
  */
 template<
-    std::size_t sSmallStringOptLength,
     typename TChar,
     typename TAllocator>
-    bool operator<=(
-        const CSmallStringOpt<sSmallStringOptLength, TChar, TAllocator>& aObj1,
-        const TChar* aArray) noexcept
+bool operator<=(
+    const CSimpleString<TChar, TAllocator>& aObj1,
+    const TChar* aArray) noexcept
 {
     return !(aObj1 > aArray);
 }
@@ -1904,7 +1514,6 @@ template<
 /**
  * @brief Compare strings using std::lexicographical_compare.
  * 
- * @tparam sSmallStringOptLength Length of small string optimization array of the 1st string.
  * @tparam TChar  Type of characters
  * @tparam TAllocator Type of allocator.
  * @param aObj1 First string to compare.
@@ -1912,12 +1521,11 @@ template<
  * @return true if the first string is a lexicographicaly before or equal the second string.
  */
 template<
-    std::size_t sSmallStringOptLength,
     typename TChar,
     typename TAllocator>
 bool operator<=(
     const std::basic_string<TChar>& aObj1,
-    const CSmallStringOpt<sSmallStringOptLength, TChar, TAllocator>& aObj2) noexcept
+    const CSimpleString<TChar, TAllocator>& aObj2) noexcept
 {
     return !(aObj1 > aObj2);
 }
@@ -1925,7 +1533,6 @@ bool operator<=(
 /**
  * @brief Compare strings using std::lexicographical_compare.
  * 
- * @tparam sSmallStringOptLength Length of small string optimization array of the 1st string.
  * @tparam TChar  Type of characters
  * @tparam TAllocator Type of allocator.
  * @param aArray First string to compare.
@@ -1933,22 +1540,19 @@ bool operator<=(
  * @return true if the first string is a lexicographicaly before or equal the second string.
  */
 template<
-    std::size_t sSmallStringOptLength,
     typename TChar,
     typename TAllocator>
 bool operator<=(
     const TChar* aArray,
-    const CSmallStringOpt<sSmallStringOptLength, TChar, TAllocator>& aObj) noexcept
+    const CSimpleString<TChar, TAllocator>& aObj) noexcept
 {
     return !(aArray > aObj);
 }
 
-////
 /**
  * @brief Push characters to the stream.
  * 
  * @tparam TCharStream Type of characters in the stream.
- * @tparam sSmallStringOptLength Length of small string optimization array of the string.
  * @tparam TChar type of characters in the string.
  * @tparam TAllocator Allocator type.
  * @param aStream Stream
@@ -1956,15 +1560,9 @@ bool operator<=(
  * 
  * @return Stream.
  */
-template<
-    typename TCharStream, 
-    std::size_t sSmallStringOptLength, 
-    typename TChar,
-    typename TAllocator>
+template<typename TCharStream, typename TChar>
 std::basic_ostream<TCharStream, std::char_traits<TCharStream>>&
-    operator<<(
-        std::basic_ostream<TCharStream, std::char_traits<TCharStream>>& aStream, 
-        const CSmallStringOpt<sSmallStringOptLength, TChar, TAllocator>& aString)
+    operator<<(std::basic_ostream<TCharStream, std::char_traits<TCharStream>>& aStream, const CSimpleString<TChar>& aString)
 {
     aStream << aString.data();
     return aStream;
@@ -1972,4 +1570,4 @@ std::basic_ostream<TCharStream, std::char_traits<TCharStream>>&
 
 } // namespace NSSO
 
-#endif // SMALL_STRING_OPTIMIZATION_HPP_
+#endif // SIMPLE_STRING_HPP_
